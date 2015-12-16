@@ -139,7 +139,7 @@ public class Engine {
 		return this.tableDescription;
 	}
 /**
- * load du lieu tu database
+ * dem so record
  * @return
  * @throws IOException
  * @throws SQLException 
