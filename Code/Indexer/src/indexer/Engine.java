@@ -142,18 +142,24 @@ public class Engine {
  * load du lieu tu database
  * @return
  * @throws IOException
+ * @throws SQLException 
  */
-	public ResultSet readDatabase() throws IOException
+	public int Count() throws IOException, SQLException
 	{
 		Config config = new Config();
 		config = readConfigFile();
 		DC dc = new DC(config);
 		if (dc.connect())
 		{
-			String sql = "SELECT * FROM `"+config.getTableName()+"`";
+			String sql = "SELECT COUNT(*) as COUNT FROM  `"+config.getTableName()+"`";
 			ResultSet rs = dc.read(sql);
-			return rs;
+			if (rs.next())
+			{
+				int count = rs.getInt("COUNT");
+				dc.close();
+				return count;
+			}
 		}		
-		return null;
+		return 0;
 	}
 }
