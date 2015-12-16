@@ -1,5 +1,7 @@
 package mysqldc;
 
+import indexer.Config;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,16 +10,18 @@ import java.sql.SQLException;
 
 public class DC {
 
-	public final String database = "recsys";
-	public final String mysqlHost = "jdbc:mysql://localhost:3306/"+database+"?useUnicode=true&characterEncoding=UTF-8";
-	public final String userName = "root";
-	public final String password = "";
+	private Config config = null;	
+	public String mysqlHost;
+	
+	
 	
 	private Connection connection = null;
 	private PreparedStatement preStatement = null;
 
-	public DC() {
+	public DC(Config conf) {
 
+		this.config = conf;
+		mysqlHost = "jdbc:mysql://localhost:3306/"+conf.getDatabase()+"?useUnicode=true&characterEncoding=UTF-8";
 	}
 
 	public Connection getConnection() {
@@ -35,8 +39,8 @@ public class DC {
 	public Boolean connect() {
 		try { 
 			Class.forName("com.mysql.jdbc.Driver");
-			connection = DriverManager.getConnection(mysqlHost, userName,
-					password);
+			connection = DriverManager.getConnection(mysqlHost, this.config.getUserName(),
+					this.config.getUserPass());
 		} catch (ClassNotFoundException e) {
 			return false;
 		} catch (SQLException e) {

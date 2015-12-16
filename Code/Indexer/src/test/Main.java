@@ -40,19 +40,6 @@ public class Main {
 	
 	public static void main2(String[] args) {
 
-		DC dc = new DC();
-		if (dc.connect()) {
-			System.out.print("OK");
-		} else {
-			System.out.print("NOT OK");
-		}
-
-		Engine engine = new Engine();
-		if (engine.Init()) {
-			engine.Indexing();
-		} else {
-
-		}
 
 		Analyzer analyzer = new StandardAnalyzer();
 
