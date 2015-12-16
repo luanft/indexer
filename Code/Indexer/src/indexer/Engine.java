@@ -138,4 +138,22 @@ public class Engine {
 	{
 		return this.tableDescription;
 	}
+/**
+ * load du lieu tu database
+ * @return
+ * @throws IOException
+ */
+	public ResultSet readDatabase() throws IOException
+	{
+		Config config = new Config();
+		config = readConfigFile();
+		DC dc = new DC(config);
+		if (dc.connect())
+		{
+			String sql = "SELECT * FROM `"+config.getTableName()+"`";
+			ResultSet rs = dc.read(sql);
+			return rs;
+		}		
+		return null;
+	}
 }
