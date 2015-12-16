@@ -8,10 +8,17 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import mysqldc.DC;
 
 public class Engine {
 	static final Path path = FileSystems.getDefault().getPath("IndexFile");
 
+	private DC dc;
+	private Config config;
+	private DataTable tableDescription = new DataTable();
 	public boolean Init() {
 		return false;
 	}
@@ -39,7 +46,7 @@ public class Engine {
 		if (Files.exists(path)) {
 			return true;
 		}
-		return false;		
+		return false;
 	}
 
 	/**
@@ -66,7 +73,7 @@ public class Engine {
 	 * doc file config
 	 * 
 	 * @return
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public Config readConfigFile() throws IOException {
 		if (this.hasConfigFile()) {
@@ -86,5 +93,49 @@ public class Engine {
 			return config;
 		}
 		return null;
+	}
+	/**
+	 * lay thong ve bang du lieu
+	 * @return
+	 */
+	public boolean loadTableDescription() {
+		try {
+			this.config = this.readConfigFile();
+			this.dc = new DC(this.config);
+			if (this.dc.connect()) {
+				ResultSet rs = this.dc.read("DESCRIBE " + config.getTableName());
+				while (rs.next()) {
+					DataColumn col = new DataColumn();
+					col.setPrimaryKey(false);
+					col.setColumnName(rs.getString("Field"));
+					String key = rs.getString("Key");
+					if(key != null)
+					{
+						if(key.equals("PRI"))
+						{
+							col.setPrimaryKey(true);
+						}
+					}									
+					tableDescription.addColumn(col);
+				}
+				this.dc.close();
+				return true;
+				
+			} else {
+				return false;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public DataTable getTableDescription()
+	{
+		return this.tableDescription;
 	}
 }
