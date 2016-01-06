@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream.GetField;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.path.PathHierarchyTokenizer;
@@ -28,61 +31,45 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermContext;
 
 import indexer.Config;
+import indexer.DataColumn;
+import indexer.DataTable;
 import indexer.Engine;
 import mysqldc.DC;
 
 public class Main {
 
-	
-	
-	public static void main2(String[] args) {
-
-
-		Analyzer analyzer = new StandardAnalyzer();
-
-		Path path = FileSystems.getDefault().getPath("IndexFile");
-
-		try {
-			Directory directory = FSDirectory.open(path);
-			IndexWriterConfig config = new IndexWriterConfig(analyzer);
-			IndexWriter iwriter = new IndexWriter(directory, config);
-			DirectoryReader ireader = DirectoryReader.open(directory);
-			IndexSearcher isearcher = new IndexSearcher(ireader);
-
-			TermQuery termqr = new TermQuery(new Term("id","1"));
-			TopDocs docs = isearcher.search(termqr, 1);
-			if (docs.totalHits == 0) {
-				Document doc = new Document();
-				String text = "Trần Minh Luận";
-				doc.add(new StringField("id", "1", Field.Store.YES));
-				doc.add(new TextField("content", text, Field.Store.YES));
-				doc.add(new TextField("c1", text, Field.Store.YES));
-				iwriter.addDocument(doc);
+	public static void main(String[] time) {
+		Engine eng = new Engine();
+		int hour = 23;
+		if (time.length > 0) {
+			hour = Integer.parseInt(time[0]);
+		}
+		if (eng.Init()) {
+			System.out.print("\n Started!");
+			try {
+				Date date = new Date();
+				boolean is_update = false;
+				while (true) {
+					if (date.getHours() == hour) {
+						if (!is_update) {
+							System.out.print("\n Updating for " + date);
+							eng.createIndexFile();
+							is_update = true;
+							System.out.print("\n Updated for " + new Date());
+						}
+					} else {
+						is_update = false;
+					}
+				}
+			} catch (SQLException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.out.print("Error when indexing data!");
 			}
-			iwriter.close();
-
-			// Parse a simple query that searches for "text":
-			QueryParser parser = new QueryParser("content", analyzer);
-			Query query = parser.parse("Luận Trần");
-			ScoreDoc[] hits = isearcher.search(query, null, 1000).scoreDocs;
-
-			// Iterate through the results:
-			for (int i = 0; i < hits.length; i++) {
-				Document hitDoc = isearcher.doc(hits[i].doc);
-				System.out.print(hitDoc.get("content") + "\n");
-			}
-			ireader.close();
-			directory.close();
-
-			System.out.print("Done! \n");
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} else {
+			System.out.print("Cann't connect database server!");
 		}
 
 	}
