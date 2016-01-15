@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream.GetField;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -37,10 +38,30 @@ import indexer.DataColumn;
 import indexer.DataTable;
 import indexer.Engine;
 import mysqldc.DC;
+import mysqldc.SQLServerConnect;
 
 public class Main {
 
 	public static void main(String[] time) {
+		SQLServerConnect con = new SQLServerConnect("1433", "sa", "sa",
+				"QuanLySinhVien");
+		try {
+
+			// con.getConnect();
+			ResultSet data = con.excuteQuery("select * from HocSinh");
+			while (data.next()) {
+				System.out.print(data.getString(1) + "  " + data.getString(2)
+						+ "\n");
+			}
+			con.Close();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public static void main1(String[] time) {
 		Engine eng = new Engine();
 		int hour = 23;
 		if (time.length > 0) {

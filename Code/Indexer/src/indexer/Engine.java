@@ -31,7 +31,13 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
+import mysqldc.ConnectionBase;
 import mysqldc.DC;
+import mysqldc.SQLServerConnect;
+
+enum DatabaseType {
+	MySql, SQLServer
+};
 
 public class Engine {
 
@@ -42,11 +48,11 @@ public class Engine {
 	IndexWriter iwriter;
 	DirectoryReader ireader;
 	IndexSearcher isearcher;
-	private DC dc;
+	private ConnectionBase dc;
 	private Config config;
 	private DataTable tableDescription = new DataTable();
 
-	public boolean Init() {
+	public boolean Init(DatabaseType type) {
 
 		path = FileSystems.getDefault().getPath("IndexFile");
 		if (!this.hasIndexDirectory()) {
@@ -60,6 +66,17 @@ public class Engine {
 			this.config = this.readConfigFile();
 			if (config == null)
 				return false;
+			switch (type) {
+			case MySql:
+					dc = new DC(this.config);
+				break;
+			case SQLServer:
+				dc = new SQLServerConnect(this.config);
+				break;
+
+			default:
+				break;
+			}
 			this.dc = new DC(this.config);
 			if (!this.loadTableDescription())
 				return false;
@@ -240,7 +257,7 @@ public class Engine {
 					}
 				}
 				docs.add(d);
-				
+
 			}
 			iwriter.addDocuments(docs);
 			iwriter.close();

@@ -8,13 +8,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class DC {
+public class DC implements ConnectionBase{
+	
 
-	private Config config = null;	
-	public String mysqlHost;
-	
-	
-	
 	private Connection connection = null;
 	private PreparedStatement preStatement = null;
 
@@ -26,14 +22,6 @@ public class DC {
 
 	public Connection getConnection() {
 		return connection;
-	}
-
-	public PreparedStatement getPrepareStatement() {
-		return preStatement;
-	}
-
-	public void setPrepareStatement(PreparedStatement pre) {
-		this.preStatement = pre;
 	}
 
 	public Boolean connect() {
@@ -60,15 +48,9 @@ public class DC {
 		return data;
 	}
 
-	public ResultSet readSecure() {
-		ResultSet data = null;
-		try {
-			data = preStatement.executeQuery();
-		} catch (SQLException e) {
-		}
-		return data;
-	}
-
+	
+	public Config config = null;	
+	public String mysqlHost;
 	public void close() {
 		try {
 			this.connection.close();
