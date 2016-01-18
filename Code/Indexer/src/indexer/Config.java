@@ -1,14 +1,21 @@
 package indexer;
-
+import mysqldc.*;
 public class Config {
 
 	private String database = "";
 	private String userName = "";
 	private String userPass = "";
 	private String tableName = "";
+	private DatabaseType server;
 	
 	
 	
+	public DatabaseType getServer() {
+		return server;
+	}
+	public void setServer(DatabaseType server) {
+		this.server = server;
+	}
 	public String getDatabase() {
 		return database;
 	}

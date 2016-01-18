@@ -1,6 +1,8 @@
 package mysqldc;
 
 import indexer.Config;
+import indexer.DataColumn;
+import indexer.DataTable;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,6 +12,36 @@ import java.sql.SQLException;
 
 public class DC implements ConnectionBase{
 	
+
+	@Override
+	public DataTable getTableInformation() {
+		DataTable tableDescription = new DataTable();
+		if(this.connect())
+		{
+			ResultSet rs = this
+					.read("DESCRIBE " + config.getTableName());
+			try {
+				while (rs.next()) {
+					DataColumn col = new DataColumn();
+					col.setPrimaryKey(false);
+					col.setColumnName(rs.getString("Field"));
+					String key = rs.getString("Key");
+					if (key != null) {
+						if (key.equals("PRI")) {
+							col.setPrimaryKey(true);
+						}
+					}
+					tableDescription.addColumn(col);
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			this.close();
+		}
+		return tableDescription;
+	}
+
 
 	private Connection connection = null;
 	private PreparedStatement preStatement = null;

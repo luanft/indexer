@@ -33,11 +33,10 @@ import org.apache.lucene.store.FSDirectory;
 
 import mysqldc.ConnectionBase;
 import mysqldc.DC;
+import mysqldc.DatabaseType;
 import mysqldc.SQLServerConnect;
 
-enum DatabaseType {
-	MySql, SQLServer
-};
+
 
 public class Engine {
 
@@ -52,7 +51,7 @@ public class Engine {
 	private Config config;
 	private DataTable tableDescription = new DataTable();
 
-	public boolean Init(DatabaseType type) {
+	public boolean Init() {
 
 		path = FileSystems.getDefault().getPath("IndexFile");
 		if (!this.hasIndexDirectory()) {
@@ -66,7 +65,7 @@ public class Engine {
 			this.config = this.readConfigFile();
 			if (config == null)
 				return false;
-			switch (type) {
+			switch (config.getServer()) {
 			case MySql:
 					dc = new DC(this.config);
 				break;
@@ -78,7 +77,8 @@ public class Engine {
 				break;
 			}
 			this.dc = new DC(this.config);
-			if (!this.loadTableDescription())
+			this.tableDescription = this.dc.getTableInformation(); 
+			if (tableDescription.isEmpty())
 				return false;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -155,12 +155,21 @@ public class Engine {
 			FileReader reader = new FileReader("config/config.txt");
 			@SuppressWarnings("resource")
 			BufferedReader buffer = new BufferedReader(reader);
+			String server = buffer.readLine();
 			String database = buffer.readLine();
 			String username = buffer.readLine();
 			String userpass = buffer.readLine();
 			String table = buffer.readLine();
 
 			Config config = new Config();
+			if(server.equals("mysql"))
+			{
+				config.setServer(DatabaseType.MySql);	
+			}
+			if(server.equals("sqlserver"))
+			{
+				config.setServer(DatabaseType.SQLServer);	
+			}						
 			config.setDatabase(database);
 			config.setUserName(username);
 			config.setUserPass(userpass);
@@ -175,37 +184,37 @@ public class Engine {
 	 * 
 	 * @return
 	 */
-	public boolean loadTableDescription() {
-		try {
-
-			if (this.dc.connect()) {
-				ResultSet rs = this.dc
-						.read("DESCRIBE " + config.getTableName());
-				while (rs.next()) {
-					DataColumn col = new DataColumn();
-					col.setPrimaryKey(false);
-					col.setColumnName(rs.getString("Field"));
-					String key = rs.getString("Key");
-					if (key != null) {
-						if (key.equals("PRI")) {
-							col.setPrimaryKey(true);
-						}
-					}
-					tableDescription.addColumn(col);
-				}
-				this.dc.close();
-				return true;
-
-			} else {
-				return false;
-			}
-
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
-	}
+//	public boolean loadTableDescription() {
+//		try {
+//
+//			if (this.dc.connect()) {
+//				ResultSet rs = this.dc
+//						.read("DESCRIBE " + config.getTableName());
+//				while (rs.next()) {
+//					DataColumn col = new DataColumn();
+//					col.setPrimaryKey(false);
+//					col.setColumnName(rs.getString("Field"));
+//					String key = rs.getString("Key");
+//					if (key != null) {
+//						if (key.equals("PRI")) {
+//							col.setPrimaryKey(true);
+//						}
+//					}
+//					tableDescription.addColumn(col);
+//				}
+//				this.dc.close();
+//				return true;
+//
+//			} else {
+//				return false;
+//			}
+//
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return false;
+//	}
 
 	public DataTable getTableDescription() {
 		return this.tableDescription;

@@ -14,4 +14,8 @@ public class DataTable {
 	{
 		return this.columns;
 	}
+	
+	public boolean isEmpty() {
+		return this.columns.size() == 0;
+	}
 }
